@@ -46,17 +46,17 @@ public class MaskCamera : MonoBehaviour
     {
         firstFrame = true;
         //Get Erase effect boundary area
-        ScreenRect.x = Dust.renderer.bounds.min.x;
-        ScreenRect.y = Dust.renderer.bounds.min.y;
-        ScreenRect.width = Dust.renderer.bounds.size.x;
-        ScreenRect.height = Dust.renderer.bounds.size.y;
+        ScreenRect.x = Dust.GetComponent<Renderer>().bounds.min.x;
+        ScreenRect.y = Dust.GetComponent<Renderer>().bounds.min.y;
+        ScreenRect.width = Dust.GetComponent<Renderer>().bounds.size.x;
+        ScreenRect.height = Dust.GetComponent<Renderer>().bounds.size.y;
         //Create new render texture for camera target texture
         rt = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.Default);
         yield return rt.Create();
         Graphics.Blit(tex, rt);
-        camera.targetTexture = rt;
+        GetComponent<Camera>().targetTexture = rt;
         //Set Mask Texture to dust material to Generate Dust erase effect
-        Dust.renderer.material.SetTexture("_MaskTex", rt);
+        Dust.GetComponent<Renderer>().material.SetTexture("_MaskTex", rt);
     }
 
     public void Update()
@@ -64,21 +64,21 @@ public class MaskCamera : MonoBehaviour
         newHolePosition = null;
         if (Input.GetMouseButton(0))
         {
-            Vector2 v = camera.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 v = GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);
             Rect worldRect = new Rect(-8.0f, -6.0f, 16.0f, 12.0f);
             if (worldRect.Contains(v))
                 newHolePosition = new Vector2(1600 * (v.x - worldRect.xMin) / worldRect.width, 1200 * (v.y - worldRect.yMin) / worldRect.height);
-            float count = 0;
-            for (int x = 0; x < tex.width; x++)
-            {
-                for (int y = 0; y < tex.height; y++)
-                {
-                    Color c = tex.GetPixel(x, y);
-                    if (c.r == 1)
-                        count++;
-                }
-            }
-            Debug.Log("---------------------------- percent:" + (count * 100 / (583 * 437)));
+            //float count = 0;
+            //for (int x = 0; x < tex.width; x++)
+            //{
+            //    for (int y = 0; y < tex.height; y++)
+            //    {
+            //        Color c = tex.GetPixel(x, y);
+            //        if (c.r == 1)
+            //            count++;
+            //    }
+            //}
+            //Debug.Log("---------------------------- percent:" + (count * 100 / (583 * 437)));
         }
     }
 
