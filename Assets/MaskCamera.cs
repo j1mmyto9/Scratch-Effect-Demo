@@ -1,17 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class MaskCamera : MonoBehaviour
 {
     public GameObject Dust;
     Rect ScreenRect;
     RenderTexture rt;
-
+    int holeWidth;
+    int holeHeight;
     public Material EraserMaterial;
     private bool firstFrame;
     private Vector2? newHolePosition;
 
-    private Texture2D tex;
+    private Texture2D tex;    
+    bool _requestReadPixel = false;
+    private Action<float> callback;
+    public void getPercent(Action<float> _callback)
+    {
+        callback = _callback;
+        _requestReadPixel = true;
+    }
 
     private void CutHole(Vector2 imageSize, Vector2 imageLocalPosition)
     {
@@ -44,7 +53,10 @@ public class MaskCamera : MonoBehaviour
 
     public IEnumerator Start()
     {
+        holeWidth = Screen.width;
+        holeHeight = Screen.height;
         firstFrame = true;
+        _requestReadPixel = false;
         //Get Erase effect boundary area
         ScreenRect.x = Dust.GetComponent<Renderer>().bounds.min.x;
         ScreenRect.y = Dust.GetComponent<Renderer>().bounds.min.y;
@@ -53,7 +65,7 @@ public class MaskCamera : MonoBehaviour
         //Create new render texture for camera target texture
         rt = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.Default);
         yield return rt.Create();
-        Graphics.Blit(tex, rt);
+        tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
         GetComponent<Camera>().targetTexture = rt;
         //Set Mask Texture to dust material to Generate Dust erase effect
         Dust.GetComponent<Renderer>().material.SetTexture("_MaskTex", rt);
@@ -65,20 +77,10 @@ public class MaskCamera : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             Vector2 v = GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);
-            Rect worldRect = new Rect(-8.0f, -6.0f, 16.0f, 12.0f);
-            if (worldRect.Contains(v))
-                newHolePosition = new Vector2(1600 * (v.x - worldRect.xMin) / worldRect.width, 1200 * (v.y - worldRect.yMin) / worldRect.height);
-            //float count = 0;
-            //for (int x = 0; x < tex.width; x++)
-            //{
-            //    for (int y = 0; y < tex.height; y++)
-            //    {
-            //        Color c = tex.GetPixel(x, y);
-            //        if (c.r == 1)
-            //            count++;
-            //    }
-            //}
-            //Debug.Log("---------------------------- percent:" + (count * 100 / (583 * 437)));
+            if (ScreenRect.Contains(v))
+            {
+                newHolePosition = new Vector2(holeWidth * (v.x - ScreenRect.xMin) / ScreenRect.width, holeHeight * (v.y - ScreenRect.yMin) / ScreenRect.height);
+            }
         }
     }
 
@@ -90,6 +92,32 @@ public class MaskCamera : MonoBehaviour
             GL.Clear(false, true, new Color(0.0f, 0.0f, 0.0f, 0.0f));
 	    }
         if (newHolePosition != null)
-            CutHole(new Vector2(1600.0f, 1200.0f), newHolePosition.Value);
+        {
+            CutHole(new Vector2(holeWidth, holeHeight), newHolePosition.Value);
+        }
+        if (_requestReadPixel)
+        {
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            float _percent = caculatoPrercent(tex);
+            _requestReadPixel = false;
+            if (callback != null)
+            {
+                callback(_percent);
+            }
+        }
 	}
+    float caculatoPrercent(Texture2D tex)
+    {
+        int count = 0;
+        for (int x = 0; x < tex.width; x++)
+        {
+            for (int y = 0; y < tex.height; y++)
+            {
+                if (tex.GetPixel(x, y).r == 1)
+                    count++;
+            }
+        }
+        float _percent = (count * 100 / ((tex.width) * (tex.height)));
+        return _percent;
+    }
 }
