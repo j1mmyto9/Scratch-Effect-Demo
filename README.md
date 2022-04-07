@@ -1,7 +1,7 @@
 # Unity Scratch Effect Demo
 Scratch Effect Demo in unity
 
-![](images/demo.gif) 
+![](Images/demo.gif) 
 
 ## How to remove dust/fog from an object in Unity with swipe?
 - **Objective­:**
@@ -9,7 +9,7 @@ Scratch Effect Demo in unity
 - **Texture Masking Shader:**
    - This shader gives an effect of a layer of dust on the screen. We only need to add dust texture and render texture (as Mask)in material shader.
 
-   ![](images/dust.png) 
+   ![](Images/dust.png) 
 
 - **How to use Shader­:** `Assets/ScratchEffect/Masked.shader`
 
@@ -24,7 +24,7 @@ texture in this material.
 - **Mask Construction Shader:** `Assets/ScratchEffect/MaskConstruction.shader`
     This shader gives a wiping off dust effect each time the user swipes the screen. To make it happen, we also need to add an eraser image and set it’s colour too.
 
-   ![](images/construction-shader.png) 
+   ![](Images/construction-shader.png) 
 
     - In Project Panel Create an empty material
     - Select Shader as “MaskConstruction”
@@ -33,7 +33,7 @@ texture in this material.
 - **Masking camera­:**
 
     Masking Camera shows dust on screen as Mask.
-    ![](images/camera.png) 
+    ![](Images/camera.png) 
 
     How to Use Masking Camera? In Hierarchy panel create a camera.
 
@@ -43,7 +43,7 @@ texture in this material.
     - and its size “5”
     - add “Camera Masking ” script on this camera object
 
-  ![](images/camera-masking.png) 
+  ![](Images/camera-masking.png) 
 
     - Drag dust object (Sprite) to get the dust effect on Screen.
     - Drag Eraser Material to wipe off the aforementioned sprite and create the effect.
